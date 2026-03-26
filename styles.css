@@ -172,6 +172,17 @@ button {
   mix-blend-mode: screen;
 }
 
+.display-screen-scale {
+  --screen-scale: 1;
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: calc(100% / var(--screen-scale));
+  height: calc(100% / var(--screen-scale));
+  transform: translateX(-50%) scale(var(--screen-scale));
+  transform-origin: top center;
+}
+
 .screen {
   position: absolute;
   inset: 0;
@@ -2356,6 +2367,18 @@ button {
   .museum-gallery {
     position: relative;
     min-height: 420px;
+  }
+}
+
+@media (max-height: 860px) and (min-width: 781px) {
+  .display-screen-scale {
+    --screen-scale: 0.93;
+  }
+}
+
+@media (max-height: 760px) and (min-width: 781px) {
+  .display-screen-scale {
+    --screen-scale: 0.87;
   }
 }
 

@@ -346,7 +346,9 @@ function App() {
       <TabBar active={screen} onChange={(next) => startTransitionSafe(() => setScreen(next))} />
       <main className="display-shell">
         <div className="display-frame">
-          <ScreenRouter screen={screen} now={now} live={live} />
+          <div className="display-screen-scale">
+            <ScreenRouter screen={screen} now={now} live={live} />
+          </div>
         </div>
       </main>
     </div>
