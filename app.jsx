@@ -1,4 +1,4 @@
-const { useEffect, useState } = React;
+const { useEffect, useRef, useState } = React;
 
 const SCREENS = [
   { id: "departures", label: "Coastal Departures" },
@@ -301,6 +301,8 @@ function getInitialScreen() {
 function App() {
   const [screen, setScreen] = useState(getInitialScreen);
   const [now, setNow] = useState(new Date());
+  const frameRef = useRef(null);
+  const [frameScale, setFrameScale] = useState(1);
   const [live, setLive] = useState({
     phase: 0,
     airport: 58,
@@ -340,13 +342,52 @@ function App() {
     window.history.replaceState({}, "", url);
   }, [screen]);
 
+  useEffect(() => {
+    if (typeof window === "undefined" || !frameRef.current) return;
+
+    const updateScale = () => {
+      const node = frameRef.current;
+      if (!node) return;
+
+      if (window.innerWidth <= 780) {
+        setFrameScale(1);
+        return;
+      }
+
+      const rect = node.getBoundingClientRect();
+      const nextScale = Math.min(rect.width / 1600, rect.height / 900);
+      setFrameScale(Number.isFinite(nextScale) && nextScale > 0 ? nextScale : 1);
+    };
+
+    updateScale();
+
+    const resizeObserver =
+      typeof ResizeObserver !== "undefined" ? new ResizeObserver(updateScale) : null;
+
+    if (resizeObserver && frameRef.current) {
+      resizeObserver.observe(frameRef.current);
+    }
+
+    window.addEventListener("resize", updateScale);
+
+    return () => {
+      window.removeEventListener("resize", updateScale);
+      resizeObserver?.disconnect();
+    };
+  }, []);
+
   return (
     <div className="app-shell">
       <Header now={now} />
       <TabBar active={screen} onChange={(next) => startTransitionSafe(() => setScreen(next))} />
       <main className="display-shell">
-        <div className="display-frame">
-          <div className="display-screen-scale">
+        <div className="display-frame" ref={frameRef}>
+          <div
+            className="display-screen-scale"
+            style={{
+              transform: `translate(-50%, -50%) scale(${frameScale})`
+            }}
+          >
             <ScreenRouter screen={screen} now={now} live={live} />
           </div>
         </div>
